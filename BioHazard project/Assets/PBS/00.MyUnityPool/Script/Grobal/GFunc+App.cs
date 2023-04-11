@@ -5,17 +5,17 @@ using UnityEngine.SceneManagement;
 
 public static partial class GFunc
 {
-    //여기 만들면 됨
-
-    public static GameObject GetRootObj()
+    public static void QuitThisGame()
     {
-        GameObject Result = default;
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+                Application.Quit();
+#endif
+    }   // QuitThisGame()
 
-        return Result;
-    }
-
-    public static Scene GetActiveScene()
+    public static void LoadScene(string sceneName_)
     {
-        return SceneManager.GetActiveScene();
-    }
+        SceneManager.LoadScene(sceneName_);
+    }   // LoadScene()
 }
