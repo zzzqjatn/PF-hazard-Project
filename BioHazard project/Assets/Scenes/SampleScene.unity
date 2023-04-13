@@ -704,7 +704,7 @@ PrefabInstance:
     - target: {fileID: 3787098671124863424, guid: 600e36971ed66984faa18b3ae0adf5b3,
         type: 3}
       propertyPath: m_Name
-      value: Chr_PressMan
+      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 3790958367537483516, guid: 600e36971ed66984faa18b3ae0adf5b3,
         type: 3}
@@ -765,7 +765,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 7f9bb4af3b19d6c418640f144f3c52dd, type: 2}
+      objectReference: {fileID: 9100000, guid: 74e55a64ad75d694db112bd7b2ba6f26, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 600e36971ed66984faa18b3ae0adf5b3, type: 3}
 --- !u!1001 &4051504772022361668

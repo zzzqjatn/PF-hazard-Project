@@ -3,9 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public static partial class GFunc
 {
+    public static void SetTxt(this GameObject obj, string inputText)
+    {
+        TMP_Text txtTemp = obj.GetComponent<TMP_Text>();
+        txtTemp.text = inputText;
+    }
+
     public static GameObject GetRootObj(string targetRoot)
     {
         Scene activeScene = GetActiveScene();
