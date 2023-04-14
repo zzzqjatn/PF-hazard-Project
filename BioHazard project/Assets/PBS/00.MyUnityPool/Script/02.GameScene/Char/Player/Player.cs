@@ -6,8 +6,8 @@ public class Player : MonoBehaviour
 {
     private const float SPEED_DEFAULT = 80.0f;
 
-    private float xAxis, zAxis;
-    public float speed;
+    public float xAxis, zAxis;
+    private float speed;
     private Rigidbody P_RB;
     private Animator P_Ani;
     private PlayerStateType P_State;
@@ -53,6 +53,8 @@ public class Player : MonoBehaviour
             P_Ani.SetBool("BWalk", false);
             P_Ani.SetBool("Walk", false);
             P_Ani.SetBool("Run", false);
+
+            P_RB.velocity = Vector3.zero;
         }
 
         if (Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.V))
@@ -100,6 +102,8 @@ public class Player : MonoBehaviour
             P_Ani.SetBool("BWalk", false);
             P_Ani.SetBool("Walk", false);
             P_Ani.SetBool("Run", true);
+
+            speed = SPEED_DEFAULT * 2.2f;
         }
         else if (Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.V))
         {
@@ -110,6 +114,8 @@ public class Player : MonoBehaviour
             P_Ani.SetBool("BWalk", false);
             P_Ani.SetBool("Walk", false);
             P_Ani.SetBool("Run", true);
+
+            speed = SPEED_DEFAULT * 2.2f;
         }
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
@@ -120,6 +126,8 @@ public class Player : MonoBehaviour
             P_Ani.SetBool("BWalk", false);
             P_Ani.SetBool("Walk", true);
             P_Ani.SetBool("Run", false);
+
+            speed = SPEED_DEFAULT;
         }
         else if (Input.GetKey(KeyCode.RightArrow))
         {
@@ -130,8 +138,14 @@ public class Player : MonoBehaviour
             P_Ani.SetBool("BWalk", false);
             P_Ani.SetBool("Walk", true);
             P_Ani.SetBool("Run", false);
+
+            speed = SPEED_DEFAULT;
         }
-        else zAxis = 0;
+        else
+        {
+            P_RB.angularVelocity = Vector3.zero;
+            zAxis = 0;
+        }
 
         if (Input.GetKeyDown(KeyCode.P))
         {
@@ -173,8 +187,10 @@ public class Player : MonoBehaviour
     {
         // Vector3 movement = new Vector3(xAxis, 0.0f, zAxis);
         Vector3 movement = this.transform.forward * xAxis;
+        // P_RB.AddForce(movement * speed * Time.deltaTime, ForceMode.Impulse);
 
-        P_RB.AddForce(movement * speed * Time.deltaTime, ForceMode.VelocityChange);
+        P_RB.velocity = movement * speed * Time.deltaTime;
+
         // Vector3 Fdir = transform.forward;
         // P_RB.velocity = new Vector3(Fdir.z * xAxis * speed * Time.deltaTime, P_RB.velocity.y, Fdir.x * xAxis * speed * Time.deltaTime);
     }
