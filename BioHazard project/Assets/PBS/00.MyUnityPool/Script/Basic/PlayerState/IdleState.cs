@@ -7,6 +7,8 @@ public class IdleState : BaseMachine
     public override void OnEnterState()
     {
         Player1.Instance.P_Ani.SetBool("Idle", true);
+        // PlayerController.Instance.SetBody_P(new Vector3(0.0f, 1.50f, -0.5f));
+        // PlayerController.Instance.SetHead_P(new Vector3(0.0f, 1.80f, -1.0f));
     }
 
     public override void OnUpdateState()

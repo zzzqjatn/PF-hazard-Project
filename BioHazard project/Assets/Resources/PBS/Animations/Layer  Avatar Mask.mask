@@ -18,11 +18,11 @@ AvatarMask:
   - m_Path: Root/Hips/Spine_01
     m_Weight: 1
   - m_Path: Root/Hips/Spine_01/Spine_02
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Root/Hips/Spine_01/Spine_02/Spine_03
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L
     m_Weight: 0
   - m_Path: Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L
@@ -52,7 +52,7 @@ AvatarMask:
   - m_Path: Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/Thumb_01/Thumb_02/Thumb_03
     m_Weight: 0
   - m_Path: Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R
     m_Weight: 0
   - m_Path: Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R
@@ -93,7 +93,7 @@ AvatarMask:
       1/Thumb_02 1/Thumb_03 1
     m_Weight: 0
   - m_Path: Root/Hips/Spine_01/Spine_02/Spine_03/Neck
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Root/Hips/Spine_01/Spine_02/Spine_03/Neck/Head
     m_Weight: 0
   - m_Path: Root/Hips/Spine_01/Spine_02/Spine_03/Neck/Head/Eyebrows

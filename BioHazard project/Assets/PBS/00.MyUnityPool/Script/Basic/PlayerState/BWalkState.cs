@@ -28,6 +28,8 @@ public class BWalkState : BaseMachine
 
     private void Move()
     {
-        Player1.Instance.P_RB.velocity = PlayerController.Instance.GetMoveMent();
+        Vector3 temp = PlayerController.Instance.GetMoveMent();
+        Player1.Instance.P_RB.velocity = new Vector3(temp.x, Player1.Instance.P_RB.velocity.y, temp.z);
+        Player1.Instance.transform.Rotate(Vector3.up, PlayerController.Instance.GetTurnDir() * (1.2f));
     }
 }

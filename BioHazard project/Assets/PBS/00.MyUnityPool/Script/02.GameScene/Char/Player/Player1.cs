@@ -4,19 +4,18 @@ using UnityEngine;
 
 public class Player1 : Singleton<Player1>
 {
-    public Rigidbody P_RB;
-    public Animator P_Ani;
-    public PlayerStateMachine P_State;
-    public CapsuleCollider P_Collider;
-    public P_StateMachine P_AniState;
+    public Rigidbody P_RB { get; private set; }
+    public Animator P_Ani { get; private set; }
+    public PlayerStateMachine P_State { get; private set; }
+    public CapsuleCollider P_Collider { get; private set; }
+    public P_StateMachine P_AniState { get; private set; }
+    public P_WeaponStyle P_weapon { get; private set; }
 
     protected override void Init()
     {
         P_RB = this.gameObject.GetComponent<Rigidbody>();
         P_Ani = this.gameObject.GetComponent<Animator>();
         P_Collider = this.gameObject.GetComponent<CapsuleCollider>();
-
-        P_AniState = P_StateMachine.Idle;
     }
 
     void Start()
@@ -37,12 +36,23 @@ public class Player1 : Singleton<Player1>
     private void InitStateMachine()
     {
         PlayerController P_contorllor = GetComponent<PlayerController>();
+        P_weapon = P_WeaponStyle.None;
         P_State = new PlayerStateMachine(P_StateMachine.Idle, new IdleState());
         P_State.AddState(P_StateMachine.Walk, new WalkState());
+        P_State.AddState(P_StateMachine.BackWalk, new BWalkState());
+        P_State.AddState(P_StateMachine.Turnning, new TurnningState());
+        P_State.AddState(P_StateMachine.Run, new RunState());
+        P_State.AddState(P_StateMachine.AimReady, new AimReadyState());
     }
-}
 
-public enum P_StateMachine
-{
-    None = -1, Idle, Walk, BackWalk, Turnning, Run, ShotReady, Fire, KnifeReady, Attack
+    public void ChangeAniState(P_StateMachine changeInput)
+    {
+        P_AniState = changeInput;
+        P_State.ChangeState(P_AniState);
+    }
+
+    public void ChangeWeapon(P_WeaponStyle changeInput)
+    {
+        P_weapon = changeInput;
+    }
 }
