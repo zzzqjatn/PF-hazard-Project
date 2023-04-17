@@ -132,18 +132,20 @@ public class PlayerController : Singleton<PlayerController>
         else
         {
             //Aim turn?
-            // if (Input.GetKey(KeyCode.LeftArrow))
-            // {
-            //     zAxis = -1;
-            //     MoveSpeed = MOVE_SPEED_DEFAULT;
-            //     Player1.Instance.ChangeAniState(P_StateMachine.Turnning);
-            // }
-            // else if (Input.GetKey(KeyCode.RightArrow))
-            // {
-            //     zAxis = 1;
-            //     MoveSpeed = MOVE_SPEED_DEFAULT;
-            //     Player1.Instance.ChangeAniState(P_StateMachine.Turnning);
-            // }
+            if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                zAxis = -1;
+                MoveSpeed = MOVE_SPEED_DEFAULT;
+                // Player1.Instance.ChangeAniState(P_StateMachine.Turnning);
+                Player1.Instance.transform.Rotate(Vector3.up, GetTurnDir());
+            }
+            else if (Input.GetKey(KeyCode.RightArrow))
+            {
+                zAxis = 1;
+                MoveSpeed = MOVE_SPEED_DEFAULT;
+                // Player1.Instance.ChangeAniState(P_StateMachine.Turnning);
+                Player1.Instance.transform.Rotate(Vector3.up, GetTurnDir());
+            }
 
             //Rig Aim
 
@@ -198,6 +200,11 @@ public class PlayerController : Singleton<PlayerController>
             }
         }
 
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Player1.Instance.TestChangeWeapon();
+        }
+
         // 사운드 체크 테스트
         if (Input.GetKeyDown(KeyCode.P))
         {
@@ -225,9 +232,6 @@ public class PlayerController : Singleton<PlayerController>
                 break;
             case P_WeaponStyle.rifle:
                 delay = 0.2f;
-                break;
-            case P_WeaponStyle.shotgun:
-                delay = 1.0f;
                 break;
         }
         yield return new WaitForSeconds(delay);
@@ -275,7 +279,7 @@ public enum P_StateMachine
 
 public enum P_WeaponStyle
 {
-    None = -1, knife, pistol, rifle, shotgun, greade
+    None, knife, pistol, rifle  //, shotgun, greade
 }
 
 public enum P_Timming

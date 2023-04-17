@@ -55,4 +55,10 @@ public class Player1 : Singleton<Player1>
     {
         P_weapon = changeInput;
     }
+
+    public void TestChangeWeapon()
+    {
+        P_weapon += 1;
+        if ((int)P_weapon > 4) P_weapon = P_WeaponStyle.None;
+    }
 }
