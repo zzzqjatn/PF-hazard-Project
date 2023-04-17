@@ -6,7 +6,7 @@ public class TurnningState : BaseMachine
 {
     public override void OnEnterState()
     {
-        Player1.Instance.P_Ani.SetBool("Walk", true);
+        Player.Instance.P_Ani.SetBool("Walk", true);
     }
 
     public override void OnUpdateState()
@@ -21,12 +21,12 @@ public class TurnningState : BaseMachine
 
     public override void OnExitState()
     {
-        Player1.Instance.P_Ani.SetBool("Walk", false);
-        Player1.Instance.P_RB.velocity = Vector3.zero;
+        Player.Instance.P_Ani.SetBool("Walk", false);
+        Player.Instance.P_RB.velocity = Vector3.zero;
     }
 
     private void TurnMove()
     {
-        Player1.Instance.transform.Rotate(Vector3.up, PlayerController.Instance.GetTurnDir());
+        Player.Instance.transform.Rotate(Vector3.up, PlayerController.Instance.GetTurnDir());
     }
 }

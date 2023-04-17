@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerController : Singleton<PlayerController>
 {
     private const float MOVE_SPEED_DEFAULT = 80.0f;
-    private Player1 P_Player;
+    private Player P_Player;
     private Ray P_ray;
     private RaycastHit P_hit;
 
@@ -20,7 +20,7 @@ public class PlayerController : Singleton<PlayerController>
 
     void Start()
     {
-        P_Player = this.gameObject.GetComponent<Player1>();
+        P_Player = this.gameObject.GetComponent<Player>();
         HeadRigPoint = this.gameObject.FindChildObj("HeadTarget");
         BodyRigPoint = this.gameObject.FindChildObj("BodyTarget");
 
@@ -47,14 +47,14 @@ public class PlayerController : Singleton<PlayerController>
                 xAxis = 1;
                 zAxis = -1;
                 MoveSpeed = MOVE_SPEED_DEFAULT * 2.2f;
-                Player1.Instance.ChangeAniState(P_StateMachine.Run);
+                Player.Instance.ChangeAniState(P_StateMachine.Run);
             }
             else if (Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.V))
             {
                 xAxis = 1;
                 zAxis = 1;
                 MoveSpeed = MOVE_SPEED_DEFAULT * 2.2f;
-                Player1.Instance.ChangeAniState(P_StateMachine.Run);
+                Player.Instance.ChangeAniState(P_StateMachine.Run);
             }
             // 걸으면서 회전
             else if (Input.GetKey(KeyCode.LeftArrow) && Input.GetKey(KeyCode.UpArrow))
@@ -62,14 +62,14 @@ public class PlayerController : Singleton<PlayerController>
                 xAxis = 1;
                 zAxis = -1;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player1.Instance.ChangeAniState(P_StateMachine.Walk);
+                Player.Instance.ChangeAniState(P_StateMachine.Walk);
             }
             else if (Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.UpArrow))
             {
                 xAxis = 1;
                 zAxis = 1;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player1.Instance.ChangeAniState(P_StateMachine.Walk);
+                Player.Instance.ChangeAniState(P_StateMachine.Walk);
             }
             // 뒤로 회전
             else if (Input.GetKey(KeyCode.LeftArrow) && Input.GetKey(KeyCode.DownArrow))
@@ -77,47 +77,47 @@ public class PlayerController : Singleton<PlayerController>
                 xAxis = -1;
                 zAxis = -1;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player1.Instance.ChangeAniState(P_StateMachine.BackWalk);
+                Player.Instance.ChangeAniState(P_StateMachine.BackWalk);
             }
             else if (Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.DownArrow))
             {
                 xAxis = -1;
                 zAxis = 1;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player1.Instance.ChangeAniState(P_StateMachine.BackWalk);
+                Player.Instance.ChangeAniState(P_StateMachine.BackWalk);
             }
             // 달리기
             else if (Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.V))
             {
                 xAxis = 1;
                 MoveSpeed = MOVE_SPEED_DEFAULT * 2.2f;
-                Player1.Instance.ChangeAniState(P_StateMachine.Run);
+                Player.Instance.ChangeAniState(P_StateMachine.Run);
             }
             //걷기 뒤로 걷기
             else if (Input.GetKey(KeyCode.UpArrow))
             {
                 xAxis = 1;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player1.Instance.ChangeAniState(P_StateMachine.Walk);
+                Player.Instance.ChangeAniState(P_StateMachine.Walk);
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
                 xAxis = -1;
                 MoveSpeed = MOVE_SPEED_DEFAULT * (0.8f);
-                Player1.Instance.ChangeAniState(P_StateMachine.BackWalk);
+                Player.Instance.ChangeAniState(P_StateMachine.BackWalk);
             }
             //회전
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
                 zAxis = -1;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player1.Instance.ChangeAniState(P_StateMachine.Turnning);
+                Player.Instance.ChangeAniState(P_StateMachine.Turnning);
             }
             else if (Input.GetKey(KeyCode.RightArrow))
             {
                 zAxis = 1;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player1.Instance.ChangeAniState(P_StateMachine.Turnning);
+                Player.Instance.ChangeAniState(P_StateMachine.Turnning);
             }
             else
             {
@@ -126,7 +126,7 @@ public class PlayerController : Singleton<PlayerController>
 
             if (xAxis == 0 && zAxis == 0)
             {
-                Player1.Instance.ChangeAniState(P_StateMachine.Idle);
+                Player.Instance.ChangeAniState(P_StateMachine.Idle);
             }
         }
         else
@@ -136,15 +136,15 @@ public class PlayerController : Singleton<PlayerController>
             {
                 zAxis = -1;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
-                // Player1.Instance.ChangeAniState(P_StateMachine.Turnning);
-                Player1.Instance.transform.Rotate(Vector3.up, GetTurnDir());
+                // Player.Instance.ChangeAniState(P_StateMachine.Turnning);
+                Player.Instance.transform.Rotate(Vector3.up, GetTurnDir());
             }
             else if (Input.GetKey(KeyCode.RightArrow))
             {
                 zAxis = 1;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
-                // Player1.Instance.ChangeAniState(P_StateMachine.Turnning);
-                Player1.Instance.transform.Rotate(Vector3.up, GetTurnDir());
+                // Player.Instance.ChangeAniState(P_StateMachine.Turnning);
+                Player.Instance.transform.Rotate(Vector3.up, GetTurnDir());
             }
 
             //Rig Aim
@@ -169,15 +169,15 @@ public class PlayerController : Singleton<PlayerController>
             }
             else if (P_Time == P_Timming.Fight)
             {
-                if (IsAimming == false && Player1.Instance.P_AniState == P_StateMachine.Idle)
+                if (IsAimming == false && Player.Instance.P_AniState == P_StateMachine.Idle)
                 {
                     IsAimming = true;
-                    Player1.Instance.ChangeAniState(P_StateMachine.AimReady);
+                    Player.Instance.ChangeAniState(P_StateMachine.AimReady);
                 }
-                else if (IsAimming == true && Player1.Instance.P_AniState == P_StateMachine.AimReady)
+                else if (IsAimming == true && Player.Instance.P_AniState == P_StateMachine.AimReady)
                 {
                     IsAimming = false;
-                    Player1.Instance.ChangeAniState(P_StateMachine.Idle);
+                    Player.Instance.ChangeAniState(P_StateMachine.Idle);
                 }
             }
         }
@@ -191,9 +191,9 @@ public class PlayerController : Singleton<PlayerController>
             }
             else if (P_Time == P_Timming.Fight)
             {
-                if (IsAimming == true && Player1.Instance.P_AniState == P_StateMachine.AimReady)
+                if (IsAimming == true && Player.Instance.P_AniState == P_StateMachine.AimReady)
                 {
-                    Player1.Instance.ChangeAniState(P_StateMachine.Hit);
+                    Player.Instance.ChangeAniState(P_StateMachine.Hit);
 
                     StartCoroutine(HitAndRePos());
                 }
@@ -202,7 +202,7 @@ public class PlayerController : Singleton<PlayerController>
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            Player1.Instance.TestChangeWeapon();
+            Player.Instance.TestChangeWeapon();
         }
 
         // 사운드 체크 테스트
@@ -222,7 +222,7 @@ public class PlayerController : Singleton<PlayerController>
     {
         float delay = 0.0f;
 
-        switch (Player1.Instance.P_weapon)
+        switch (Player.Instance.P_weapon)
         {
             case P_WeaponStyle.knife:
                 delay = 0.8f;
@@ -235,7 +235,7 @@ public class PlayerController : Singleton<PlayerController>
                 break;
         }
         yield return new WaitForSeconds(delay);
-        Player1.Instance.ChangeAniState(P_StateMachine.AimReady);
+        Player.Instance.ChangeAniState(P_StateMachine.AimReady);
     }
 
     private void EffectTest()
