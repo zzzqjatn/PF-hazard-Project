@@ -6,7 +6,7 @@ public class TestBtn : MonoBehaviour
 {
     public void OnClicked()
     {
-        // LoadingManager.Instance.FadeoutGotoScene(LoadingManager.S_GAME_NAME);
-        JsonLoadManager.Instance.SetSaveData(1);
+        LoadingManager.Instance.FadeoutGotoScene(LoadingManager.S_GAME_NAME);
+        // JsonLoadManager.Instance.SetSaveData(1);
     }
 }

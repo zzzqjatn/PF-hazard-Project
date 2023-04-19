@@ -90,6 +90,7 @@ public class PlayerController : Singleton<PlayerController>
             else if (Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.V))
             {
                 xAxis = 1;
+                zAxis = 0;
                 MoveSpeed = MOVE_SPEED_DEFAULT * 2.2f;
                 Player.Instance.ChangeAniState(P_StateMachine.Run);
             }
@@ -97,12 +98,14 @@ public class PlayerController : Singleton<PlayerController>
             else if (Input.GetKey(KeyCode.UpArrow))
             {
                 xAxis = 1;
+                zAxis = 0;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
                 Player.Instance.ChangeAniState(P_StateMachine.Walk);
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
                 xAxis = -1;
+                zAxis = 0;
                 MoveSpeed = MOVE_SPEED_DEFAULT * (0.8f);
                 Player.Instance.ChangeAniState(P_StateMachine.BackWalk);
             }
@@ -110,12 +113,14 @@ public class PlayerController : Singleton<PlayerController>
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
                 zAxis = -1;
+                xAxis = 0;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
                 Player.Instance.ChangeAniState(P_StateMachine.Turnning);
             }
             else if (Input.GetKey(KeyCode.RightArrow))
             {
                 zAxis = 1;
+                xAxis = 0;
                 MoveSpeed = MOVE_SPEED_DEFAULT;
                 Player.Instance.ChangeAniState(P_StateMachine.Turnning);
             }
@@ -272,17 +277,17 @@ public class PlayerController : Singleton<PlayerController>
         BodyRigPoint.transform.localPosition = pos;
     }
 }
-public enum P_StateMachine
+public enum Z_StateMachine
 {
     None = -1, Idle, Walk, BackWalk, Turnning, Run, AimReady, Hit
 }
 
-public enum P_WeaponStyle
+public enum Z_WeaponStyle
 {
     None, knife, pistol, rifle  //, shotgun, greade
 }
 
-public enum P_Timming
+public enum Z_Timming
 {
     None = -1, Question, Item, Action, Fight
 }
