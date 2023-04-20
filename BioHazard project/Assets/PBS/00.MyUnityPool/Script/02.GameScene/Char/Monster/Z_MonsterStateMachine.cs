@@ -5,15 +5,15 @@ using UnityEngine;
 public class Z_MonsterStateMachine
 {
     public BaseMachine CurrentState { get; private set; }
-    private Dictionary<P_StateMachine, BaseMachine> states = new Dictionary<P_StateMachine, BaseMachine>();
+    private Dictionary<Z_StateMachine, BaseMachine> states = new Dictionary<Z_StateMachine, BaseMachine>();
 
-    public Z_MonsterStateMachine(P_StateMachine stateName, BaseMachine state)
+    public Z_MonsterStateMachine(Z_StateMachine stateName, BaseMachine state)
     {
         AddState(stateName, state);
         CurrentState = GetState(stateName);
     }
 
-    public void AddState(P_StateMachine stateName, BaseMachine state)
+    public void AddState(Z_StateMachine stateName, BaseMachine state)
     {
         if (!states.ContainsKey(stateName))
         {
@@ -21,7 +21,7 @@ public class Z_MonsterStateMachine
         }
     }
 
-    public BaseMachine GetState(P_StateMachine stateName)
+    public BaseMachine GetState(Z_StateMachine stateName)
     {
         if (states.TryGetValue(stateName, out BaseMachine state))
             return state;
@@ -29,7 +29,7 @@ public class Z_MonsterStateMachine
         return null;
     }
 
-    public void DeleteState(P_StateMachine removeStateName)
+    public void DeleteState(Z_StateMachine removeStateName)
     {
         if (states.ContainsKey(removeStateName))
         {
@@ -37,7 +37,7 @@ public class Z_MonsterStateMachine
         }
     }
 
-    public void ChangeState(P_StateMachine nextStateName)
+    public void ChangeState(Z_StateMachine nextStateName)
     {
         CurrentState.OnExitState();
         if (states.TryGetValue(nextStateName, out BaseMachine newState))

@@ -1,260 +1,145 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
-public class Z_MonsterController : Singleton<PlayerController>
+public class Z_MonsterController : Singleton<Z_MonsterController>
 {
-    private const float MOVE_SPEED_DEFAULT = 80.0f;
-    private Player P_Player;
-    private Ray P_ray;
-    private RaycastHit P_hit;
+    private const float MOVE_SPEED_DEFAULT = 1.0f;
+    private Z_Monster Z_monster;
 
-    private GameObject HeadRigPoint;
-    private GameObject BodyRigPoint;
+    private float viewAngle;
+    private float viewDistance;
+    private LayerMask TargetMask;
+    private LayerMask ObstacleMask;
+    public NavMeshAgent Z_Agent;
 
+    private Ray Z_ray;
+    private RaycastHit Z_hit;
     private float xAxis, zAxis;
     private float MoveSpeed;
     private bool IsAimming;
 
-    private P_Timming P_Time;
+    private float RandomTime;
+    private float RandomEndTime;
+
+    public Transform targetPos;
+    private float targetRange;
+    private Vector3 rpPoint;
 
     void Start()
     {
-        P_Player = this.gameObject.GetComponent<Player>();
-        HeadRigPoint = this.gameObject.FindChildObj("HeadTarget");
-        BodyRigPoint = this.gameObject.FindChildObj("BodyTarget");
+        Z_monster = this.gameObject.GetComponent<Z_Monster>();
+        Z_Agent = this.gameObject.GetComponent<NavMeshAgent>();
 
         MoveSpeed = MOVE_SPEED_DEFAULT;
         xAxis = 0;
         zAxis = 0;
 
         IsAimming = false;
-        P_Time = P_Timming.Fight;
+
+        RandomTime = 0;
+        RandomEndTime = Random.RandomRange(0.0f, 6.0f);
+        Debug.Log(RandomEndTime);
+
+        targetPos = this.transform;
+        targetRange = 10.0f;
     }
 
     void Update()
     {
-        keyCon();
+        RandomPattens();
     }
 
-    private void keyCon()
+    public Vector3 DirFormAngle(float angleDegrees)
     {
-        if (IsAimming == false)
+        angleDegrees += transform.eulerAngles.y;
+        return new Vector3(Mathf.Sin(angleDegrees * Mathf.Deg2Rad), 0, Mathf.Cos(angleDegrees * Mathf.Deg2Rad));
+    }
+
+    public void DrawView()
+    {
+        Vector3 leftBoundary = DirFormAngle(-viewAngle / 2);
+        Vector3 rightBoundary = DirFormAngle(viewAngle / 2);
+        Debug.DrawLine(transform.position, transform.position + leftBoundary * viewDistance, Color.blue);
+        Debug.DrawLine(transform.position, transform.position + rightBoundary * viewDistance, Color.blue);
+    }
+
+    public void FindVisibleTargets()
+    {
+        Collider[] targets = Physics.OverlapSphere(transform.position, viewDistance, TargetMask);
+
+        if (targets.Length > 0)
         {
-            //달리면서 회전
-            if (Input.GetKey(KeyCode.LeftArrow) && Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.V))
+            for (int i = 0; i < targets.Length; i++)
             {
-                xAxis = 1;
-                zAxis = -1;
-                MoveSpeed = MOVE_SPEED_DEFAULT * 2.2f;
-                Player.Instance.ChangeAniState(P_StateMachine.Run);
-            }
-            else if (Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.V))
-            {
-                xAxis = 1;
-                zAxis = 1;
-                MoveSpeed = MOVE_SPEED_DEFAULT * 2.2f;
-                Player.Instance.ChangeAniState(P_StateMachine.Run);
-            }
-            // 걸으면서 회전
-            else if (Input.GetKey(KeyCode.LeftArrow) && Input.GetKey(KeyCode.UpArrow))
-            {
-                xAxis = 1;
-                zAxis = -1;
-                MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player.Instance.ChangeAniState(P_StateMachine.Walk);
-            }
-            else if (Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.UpArrow))
-            {
-                xAxis = 1;
-                zAxis = 1;
-                MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player.Instance.ChangeAniState(P_StateMachine.Walk);
-            }
-            // 뒤로 회전
-            else if (Input.GetKey(KeyCode.LeftArrow) && Input.GetKey(KeyCode.DownArrow))
-            {
-                xAxis = -1;
-                zAxis = -1;
-                MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player.Instance.ChangeAniState(P_StateMachine.BackWalk);
-            }
-            else if (Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.DownArrow))
-            {
-                xAxis = -1;
-                zAxis = 1;
-                MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player.Instance.ChangeAniState(P_StateMachine.BackWalk);
-            }
-            // 달리기
-            else if (Input.GetKey(KeyCode.UpArrow) && Input.GetKey(KeyCode.V))
-            {
-                xAxis = 1;
-                zAxis = 0;
-                MoveSpeed = MOVE_SPEED_DEFAULT * 2.2f;
-                Player.Instance.ChangeAniState(P_StateMachine.Run);
-            }
-            //걷기 뒤로 걷기
-            else if (Input.GetKey(KeyCode.UpArrow))
-            {
-                xAxis = 1;
-                zAxis = 0;
-                MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player.Instance.ChangeAniState(P_StateMachine.Walk);
-            }
-            else if (Input.GetKey(KeyCode.DownArrow))
-            {
-                xAxis = -1;
-                zAxis = 0;
-                MoveSpeed = MOVE_SPEED_DEFAULT * (0.8f);
-                Player.Instance.ChangeAniState(P_StateMachine.BackWalk);
-            }
-            //회전
-            else if (Input.GetKey(KeyCode.LeftArrow))
-            {
-                zAxis = -1;
-                xAxis = 0;
-                MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player.Instance.ChangeAniState(P_StateMachine.Turnning);
-            }
-            else if (Input.GetKey(KeyCode.RightArrow))
-            {
-                zAxis = 1;
-                xAxis = 0;
-                MoveSpeed = MOVE_SPEED_DEFAULT;
-                Player.Instance.ChangeAniState(P_StateMachine.Turnning);
-            }
-            else
-            {
-                xAxis = 0; zAxis = 0;
-            }
+                Transform target = targets[i].transform;
+                Vector3 dirToTarget = (target.position - transform.position).normalized;
 
-            if (xAxis == 0 && zAxis == 0)
-            {
-                Player.Instance.ChangeAniState(P_StateMachine.Idle);
-            }
-        }
-        else
-        {
-            //Aim turn?
-            if (Input.GetKey(KeyCode.LeftArrow))
-            {
-                zAxis = -1;
-                MoveSpeed = MOVE_SPEED_DEFAULT;
-                // Player.Instance.ChangeAniState(P_StateMachine.Turnning);
-                Player.Instance.transform.Rotate(Vector3.up, GetTurnDir());
-            }
-            else if (Input.GetKey(KeyCode.RightArrow))
-            {
-                zAxis = 1;
-                MoveSpeed = MOVE_SPEED_DEFAULT;
-                // Player.Instance.ChangeAniState(P_StateMachine.Turnning);
-                Player.Instance.transform.Rotate(Vector3.up, GetTurnDir());
-            }
-
-            //Rig Aim
-
-            //반경 보는 방향 45도
-        }
-
-        // 확인 / 조준 / 습득 / 액션
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            if (P_Time == P_Timming.Question)
-            {
-
-            }
-            else if (P_Time == P_Timming.Item)
-            {
-
-            }
-            else if (P_Time == P_Timming.Action)
-            {
-
-            }
-            else if (P_Time == P_Timming.Fight)
-            {
-                if (IsAimming == false && Player.Instance.P_AniState == P_StateMachine.Idle)
+                if (Vector3.Dot(transform.forward, dirToTarget) > Mathf.Cos((viewAngle / 2) * Mathf.Deg2Rad))
                 {
-                    IsAimming = true;
-                    Player.Instance.ChangeAniState(P_StateMachine.AimReady);
-                }
-                else if (IsAimming == true && Player.Instance.P_AniState == P_StateMachine.AimReady)
-                {
-                    IsAimming = false;
-                    Player.Instance.ChangeAniState(P_StateMachine.Idle);
+                    float distToTarget = Vector3.Distance(transform.position, target.position);
+
+                    if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, ObstacleMask))
+                    {
+                        Debug.DrawLine(transform.position, target.position, Color.red);
+                    }
                 }
             }
         }
+    }
 
-        // 취소 / 조준 시 발사
-        if (Input.GetKeyDown(KeyCode.C))
+    private void RandomPattens()
+    {
+        RandomTime += Time.deltaTime;
+
+        if (RandomTime >= RandomEndTime)
         {
-            if (P_Time == P_Timming.Question)
+            int stateNum = Random.RandomRange(0, 3);
+
+            switch (stateNum)
             {
-
+                case 0:
+                    Z_monster.ChangeAniState(Z_StateMachine.Idle);
+                    break;
+                case 1:
+                    //목표지점
+                    if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint))
+                    {
+                        targetPos.position = rpPoint;
+                        Z_monster.ChangeAniState(Z_StateMachine.Walk);
+                    }
+                    break;
+                case 2:
+                    //목표지점
+                    if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint))
+                    {
+                        targetPos.position = rpPoint;
+                        Z_monster.ChangeAniState(Z_StateMachine.Run);
+                    }
+                    break;
             }
-            else if (P_Time == P_Timming.Fight)
-            {
-                if (IsAimming == true && Player.Instance.P_AniState == P_StateMachine.AimReady)
-                {
-                    Player.Instance.ChangeAniState(P_StateMachine.Hit);
-
-                    StartCoroutine(HitAndRePos());
-                }
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            Player.Instance.TestChangeWeapon();
-        }
-
-        // 사운드 체크 테스트
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            AudioManager.Instance.PlayBgm(AudioManager.RACCONCITY_N + 0);
-        }
-
-        // 이펙트 체크 테스트
-        if (Input.GetMouseButtonDown(0))
-        {
-            EffectTest();
+            RandomTime = 0.0f;
+            RandomEndTime = Random.RandomRange(0.0f, 6.0f);
+            Debug.Log(RandomEndTime);
         }
     }
 
-    IEnumerator HitAndRePos()
+    public bool CheckRandomPoint(Vector3 center, float range, out Vector3 result)
     {
-        float delay = 0.0f;
-
-        switch (Player.Instance.P_weapon)
+        for (int i = 0; i < 30; i++)
         {
-            case P_WeaponStyle.knife:
-                delay = 0.8f;
-                break;
-            case P_WeaponStyle.pistol:
-                delay = 0.5f;
-                break;
-            case P_WeaponStyle.rifle:
-                delay = 0.2f;
-                break;
-        }
-        yield return new WaitForSeconds(delay);
-        Player.Instance.ChangeAniState(P_StateMachine.AimReady);
-    }
+            Vector3 randomPoint = center + Random.insideUnitSphere * range;
+            NavMeshHit hit;
 
-    private void EffectTest()
-    {
-        P_ray.origin = this.transform.position;
-        P_ray.direction = this.transform.forward;
-
-        if (Physics.Raycast(P_ray, out P_hit))
-        {
-            if (P_hit.point != null)
+            if (NavMesh.SamplePosition(randomPoint, out hit, 1.0f, NavMesh.AllAreas))
             {
-                EffectManager.Instance.PlayEffect(P_hit.point, P_hit.normal, false, EffectType.BloodSpot);
+                result = hit.position;
+                return true;
             }
         }
+        result = Vector3.zero;
+        return false;
     }
 
     public Vector3 GetMoveMent()
@@ -267,27 +152,13 @@ public class Z_MonsterController : Singleton<PlayerController>
     {
         return zAxis;
     }
-
-    public void SetHead_P(Vector3 pos)
-    {
-        HeadRigPoint.transform.localPosition = pos;
-    }
-    public void SetBody_P(Vector3 pos)
-    {
-        BodyRigPoint.transform.localPosition = pos;
-    }
 }
-public enum P_StateMachine
+public enum Z_StateMachine
 {
-    None = -1, Idle, Walk, BackWalk, Turnning, Run, AimReady, Hit
+    None = -1, Idle, Walk, Run, Turnning, Attck, Scream, HitBite, DownBite, DownBiteKeep, CrawlRun, CrawlDown
 }
 
-public enum P_WeaponStyle
-{
-    None, knife, pistol, rifle  //, shotgun, greade
-}
-
-public enum P_Timming
+public enum Z_Timming
 {
     None = -1, Question, Item, Action, Fight
 }

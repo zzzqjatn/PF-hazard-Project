@@ -277,17 +277,17 @@ public class PlayerController : Singleton<PlayerController>
         BodyRigPoint.transform.localPosition = pos;
     }
 }
-public enum Z_StateMachine
+public enum P_StateMachine
 {
     None = -1, Idle, Walk, BackWalk, Turnning, Run, AimReady, Hit
 }
 
-public enum Z_WeaponStyle
+public enum P_WeaponStyle
 {
     None, knife, pistol, rifle  //, shotgun, greade
 }
 
-public enum Z_Timming
+public enum P_Timming
 {
     None = -1, Question, Item, Action, Fight
 }
