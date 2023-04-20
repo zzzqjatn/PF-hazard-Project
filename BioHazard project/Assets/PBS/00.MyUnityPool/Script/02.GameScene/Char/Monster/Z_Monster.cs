@@ -32,9 +32,8 @@ public class Z_Monster : Singleton<Z_Monster>
     {
         Z_MonsterController Z_contorllor = GetComponent<Z_MonsterController>();
         Z_State = new Z_MonsterStateMachine(Z_StateMachine.Idle, new Z_IdleState());
-        Z_State.AddState(Z_StateMachine.Walk, new WalkState());
-        Z_State.AddState(Z_StateMachine.Turnning, new TurnningState());
-        Z_State.AddState(Z_StateMachine.Run, new RunState());
+        Z_State.AddState(Z_StateMachine.Walk, new Z_WalkState());
+        Z_State.AddState(Z_StateMachine.Run, new Z_RunState());
     }
 
     public void ChangeAniState(Z_StateMachine changeInput)
