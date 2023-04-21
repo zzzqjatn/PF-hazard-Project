@@ -3,53 +3,123 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Z_MonsterController : Singleton<Z_MonsterController>
+public class Z_MonsterController : MonoBehaviour
 {
+    //===== 
     private const float MOVE_SPEED_DEFAULT = 1.0f;
-    private Z_Monster Z_monster;
-
-    private float viewAngle;
-    private float viewDistance;
-    private LayerMask TargetMask;
-    private LayerMask ObstacleMask;
-    public NavMeshAgent Z_Agent;
-
-    private Ray Z_ray;
-    private RaycastHit Z_hit;
-    private float xAxis, zAxis;
+    private Z_Monster monster;
+    public NavMeshAgent Agent { get; private set; }
     private float MoveSpeed;
-    private bool IsAimming;
-
     private float RandomTime;
     private float RandomEndTime;
-
     public Transform targetPos;
     private float targetRange;
     private Vector3 rpPoint;
 
+    //===== 
+    public Transform Trans;
+    public bool IsMoving;
+
+    //===== 
+    private Ray ray;
+    private RaycastHit hit;
+    private float viewAngle;
+    private float viewDistance;
+    private LayerMask TargetMask;
+    private LayerMask ObstacleMask;
+
     void Start()
     {
-        Z_monster = this.gameObject.GetComponent<Z_Monster>();
-        Z_Agent = this.gameObject.GetComponent<NavMeshAgent>();
+        monster = this.gameObject.GetComponent<Z_Monster>();
+        Agent = this.gameObject.GetComponent<NavMeshAgent>();
+        Trans = this.transform;
+        Agent.baseOffset = -0.05f;
 
         MoveSpeed = MOVE_SPEED_DEFAULT;
-        xAxis = 0;
-        zAxis = 0;
-
-        IsAimming = false;
 
         RandomTime = 0;
         RandomEndTime = Random.RandomRange(0.0f, 6.0f);
-        Debug.Log(RandomEndTime);
 
-        targetPos = this.transform;
+        // targetPos = transform.position;
         targetRange = 10.0f;
+
+        IsMoving = false;
     }
 
     void Update()
     {
         RandomPattens();
     }
+
+    private void RandomPattens()
+    {
+        if (!IsMoving)
+        {
+            RandomTime += Time.deltaTime;
+
+            if (RandomTime >= RandomEndTime)
+            {
+                int stateNum = Random.RandomRange(0, 2);
+
+                switch (stateNum)
+                {
+                    case 0:
+                        monster.ChangeAniState(Z_StateMachine.Idle);
+                        IsMoving = false;
+                        break;
+                    case 1:
+                        //목표지점
+                        if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint))
+                        {
+                            targetPos.position = rpPoint;
+                            monster.ChangeAniState(Z_StateMachine.Walk);
+                            IsMoving = true;
+                        }
+                        break;
+                        // case 2:
+                        //     //목표지점
+                        //     if (CheckRandomPoint(targetPos, targetRange, out rpPoint))
+                        //     {
+                        //         targetPos = rpPoint;
+                        //         Z_monster.ChangeAniState(Z_StateMachine.Run);
+                        //         IsMoving = true;
+                        //     }
+                        //     break;
+                }
+                RandomTime = 0.0f;
+                RandomEndTime = Random.RandomRange(2.0f, 3.0f);
+            }
+        }
+    }
+
+    public bool CheckRandomPoint(Vector3 center, float range, out Vector3 result)
+    {
+        for (int i = 0; i < 30; i++)
+        {
+            Vector3 randomPoint = center + Random.insideUnitSphere * range;
+            NavMeshHit hit;
+
+            if (NavMesh.SamplePosition(randomPoint, out hit, 1.0f, NavMesh.AllAreas))
+            {
+                result = hit.position;
+                return true;
+            }
+        }
+        result = Vector3.zero;
+        return false;
+    }
+
+    public void SetNavOffsetY(float inputData)
+    {
+        Agent.baseOffset = inputData;
+    }
+
+    public void SetTranRot(Quaternion input)
+    {
+        this.transform.rotation = input;
+    }
+
+    //==========================================================
 
     public Vector3 DirFormAngle(float angleDegrees)
     {
@@ -89,69 +159,17 @@ public class Z_MonsterController : Singleton<Z_MonsterController>
         }
     }
 
-    private void RandomPattens()
-    {
-        RandomTime += Time.deltaTime;
-
-        if (RandomTime >= RandomEndTime)
-        {
-            int stateNum = Random.RandomRange(0, 3);
-
-            switch (stateNum)
-            {
-                case 0:
-                    Z_monster.ChangeAniState(Z_StateMachine.Idle);
-                    break;
-                case 1:
-                    //목표지점
-                    if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint))
-                    {
-                        targetPos.position = rpPoint;
-                        Z_monster.ChangeAniState(Z_StateMachine.Walk);
-                    }
-                    break;
-                case 2:
-                    //목표지점
-                    if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint))
-                    {
-                        targetPos.position = rpPoint;
-                        Z_monster.ChangeAniState(Z_StateMachine.Run);
-                    }
-                    break;
-            }
-            RandomTime = 0.0f;
-            RandomEndTime = Random.RandomRange(0.0f, 6.0f);
-            Debug.Log(RandomEndTime);
-        }
-    }
-
-    public bool CheckRandomPoint(Vector3 center, float range, out Vector3 result)
-    {
-        for (int i = 0; i < 30; i++)
-        {
-            Vector3 randomPoint = center + Random.insideUnitSphere * range;
-            NavMeshHit hit;
-
-            if (NavMesh.SamplePosition(randomPoint, out hit, 1.0f, NavMesh.AllAreas))
-            {
-                result = hit.position;
-                return true;
-            }
-        }
-        result = Vector3.zero;
-        return false;
-    }
-
-    public Vector3 GetMoveMent()
-    {
-        Vector3 movement = this.transform.forward * xAxis;
-        return movement * MoveSpeed * Time.deltaTime;
-    }
-
-    public float GetTurnDir()
-    {
-        return zAxis;
-    }
+    // private void IsMovingEnd()
+    // {
+    //     if (IsMoving)
+    //     {
+    //         if (Vector3.Distance(transform.position, targetPos) > 0.2f)
+    //         {
+    //             Z_monster.ChangeAniState(Z_StateMachine.Idle);
+    //             IsMoving = false;
+    //         }
+    //     }
+    // }
 }
 public enum Z_StateMachine
 {

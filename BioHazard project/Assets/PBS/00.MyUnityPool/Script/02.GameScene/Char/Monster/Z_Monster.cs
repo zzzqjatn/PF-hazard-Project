@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Z_Monster : Singleton<Z_Monster>
+public class Z_Monster : MonoBehaviour
 {
     public Rigidbody Z_RB { get; private set; }
     public Animator Z_Ani { get; private set; }
@@ -31,9 +31,18 @@ public class Z_Monster : Singleton<Z_Monster>
     private void InitStateMachine()
     {
         Z_MonsterController Z_contorllor = GetComponent<Z_MonsterController>();
-        Z_State = new Z_MonsterStateMachine(Z_StateMachine.Idle, new Z_IdleState());
-        Z_State.AddState(Z_StateMachine.Walk, new Z_WalkState());
-        Z_State.AddState(Z_StateMachine.Run, new Z_RunState());
+
+        Z_IdleState idle = new Z_IdleState();
+        Z_WalkState walk = new Z_WalkState();
+        Z_RunState run = new Z_RunState();
+
+        idle.SetController(this, Z_contorllor);
+        walk.SetController(this, Z_contorllor);
+        run.SetController(this, Z_contorllor);
+
+        Z_State = new Z_MonsterStateMachine(Z_StateMachine.Idle, idle);
+        Z_State.AddState(Z_StateMachine.Walk, walk);
+        Z_State.AddState(Z_StateMachine.Run, run);
     }
 
     public void ChangeAniState(Z_StateMachine changeInput)

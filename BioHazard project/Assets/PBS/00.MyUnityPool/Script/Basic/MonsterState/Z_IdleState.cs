@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class Z_IdleState : BaseMachine
 {
+    Z_Monster Z_monster;
+    Z_MonsterController Z_control;
     public override void OnEnterState()
     {
-        Z_Monster.Instance.Z_Ani.SetBool("Idle", true);
+        Z_monster.Z_Ani.SetBool("Idle", true);
+        Z_control.SetNavOffsetY(-0.05f);
     }
 
     public override void OnUpdateState()
@@ -21,6 +24,11 @@ public class Z_IdleState : BaseMachine
 
     public override void OnExitState()
     {
-        Z_Monster.Instance.Z_Ani.SetBool("Idle", false);
+        Z_monster.Z_Ani.SetBool("Idle", false);
+    }
+    public void SetController(Z_Monster zMon, Z_MonsterController zCon)
+    {
+        Z_monster = zMon;
+        Z_control = zCon;
     }
 }
