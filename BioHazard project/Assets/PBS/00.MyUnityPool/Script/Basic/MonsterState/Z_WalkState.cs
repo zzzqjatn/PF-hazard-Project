@@ -13,8 +13,9 @@ public class Z_WalkState : BaseMachine
         Z_monster.Z_Ani.SetBool("Walk", true);
         Z_control.SetNavOffsetY(-0.1f);
 
-        Z_control.Agent.speed = 0;
-        Z_control.Agent.angularSpeed = 20;
+        Z_control.Agent.speed = 0.8f;
+        // Z_control.Agent.speed = 0;
+        // Z_control.Agent.angularSpeed = 20;
         Z_control.Agent.SetDestination(Z_control.targetPos.position);
     }
 
@@ -25,7 +26,7 @@ public class Z_WalkState : BaseMachine
 
     public override void OnFixedUpdateState()
     {
-        MoveMonster();
+        MoveCheckMonster();
     }
 
     public override void OnExitState()
@@ -33,26 +34,27 @@ public class Z_WalkState : BaseMachine
         Z_monster.Z_Ani.SetBool("Walk", false);
     }
 
-    private void MoveMonster()
+    private void MoveCheckMonster()
     {
         Vector3 targetDir = (Z_control.targetPos.position - Z_control.Trans.position).normalized;
+        targetDir.y = 0;
 
         F_Angle = Vector3.Angle(targetDir, Z_control.Trans.forward);
-        Z_control.SetTranRot(Quaternion.Slerp(Z_control.Trans.rotation, Quaternion.LookRotation(targetDir), Time.deltaTime * 2.0f));
-        Debug.Log(F_Angle);
+        // Z_control.SetTranRot(Quaternion.Slerp(Z_control.Trans.rotation, Quaternion.LookRotation(targetDir), Time.deltaTime * 2.0f));
+        // Debug.Log(F_Angle);
 
         if (F_Angle <= 1.0f)
         {
-            Z_control.Agent.speed = 1;
+            // Z_control.Agent.speed = 1;
         }
 
-        // float targetDis = Vector3.Distance(Z_control.targetPos, Z_control.Trans.position);
+        float targetDis = Vector3.Distance(Z_control.targetPos.position, Z_control.Trans.position);
         // Debug.Log(targetDis);
 
-        // if (targetDis <= 0.1f)
-        // {
-        //     Z_control.IsMoving = true;
-        // }
+        if (targetDis <= 0.3f)
+        {
+            Z_control.StopAndResetMotion();
+        }
     }
 
     public void SetController(Z_Monster zMon, Z_MonsterController zCon)

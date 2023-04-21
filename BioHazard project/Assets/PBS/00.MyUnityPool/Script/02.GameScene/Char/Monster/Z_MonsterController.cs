@@ -59,7 +59,7 @@ public class Z_MonsterController : MonoBehaviour
 
             if (RandomTime >= RandomEndTime)
             {
-                int stateNum = Random.RandomRange(0, 2);
+                int stateNum = Random.RandomRange(0, 3);
 
                 switch (stateNum)
                 {
@@ -76,15 +76,15 @@ public class Z_MonsterController : MonoBehaviour
                             IsMoving = true;
                         }
                         break;
-                        // case 2:
-                        //     //목표지점
-                        //     if (CheckRandomPoint(targetPos, targetRange, out rpPoint))
-                        //     {
-                        //         targetPos = rpPoint;
-                        //         Z_monster.ChangeAniState(Z_StateMachine.Run);
-                        //         IsMoving = true;
-                        //     }
-                        //     break;
+                    case 2:
+                        //목표지점
+                        if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint))
+                        {
+                            targetPos.position = rpPoint;
+                            monster.ChangeAniState(Z_StateMachine.Run);
+                            IsMoving = true;
+                        }
+                        break;
                 }
                 RandomTime = 0.0f;
                 RandomEndTime = Random.RandomRange(2.0f, 3.0f);
@@ -117,6 +117,12 @@ public class Z_MonsterController : MonoBehaviour
     public void SetTranRot(Quaternion input)
     {
         this.transform.rotation = input;
+    }
+
+    public void StopAndResetMotion()
+    {
+        monster.ChangeAniState(Z_StateMachine.Idle);
+        IsMoving = false;
     }
 
     //==========================================================
