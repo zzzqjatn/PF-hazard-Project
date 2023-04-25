@@ -24,8 +24,8 @@ public class Z_MonsterController : MonoBehaviour
     private Ray ray;
     private RaycastHit hit;
     private float viewAngle;
-    private float viewDistance;
-    private LayerMask TargetMask;
+    public float viewDistance;
+    public LayerMask TargetMask;
     private LayerMask ObstacleMask;
 
     void Start()
@@ -40,9 +40,7 @@ public class Z_MonsterController : MonoBehaviour
         RandomTime = 0;
         RandomEndTime = Random.RandomRange(0.0f, 6.0f);
 
-        // targetPos = transform.position;
         targetRange = 10.0f;
-
         IsMoving = false;
     }
 
@@ -59,36 +57,56 @@ public class Z_MonsterController : MonoBehaviour
 
             if (RandomTime >= RandomEndTime)
             {
-                int stateNum = Random.RandomRange(0, 3);
+                int stateNum = Random.RandomRange(0, 4);
 
                 switch (stateNum)
                 {
                     case 0:
                         monster.ChangeAniState(Z_StateMachine.Idle);
                         IsMoving = false;
+                        RandomEndTime = Random.RandomRange(2.0f, 10.0f);
                         break;
                     case 1:
-                        //목표지점
                         if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint))
                         {
                             targetPos.position = rpPoint;
                             monster.ChangeAniState(Z_StateMachine.Walk);
                             IsMoving = true;
+                            RandomEndTime = Random.RandomRange(2.0f, 3.0f);
                         }
                         break;
                     case 2:
-                        //목표지점
                         if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint))
                         {
                             targetPos.position = rpPoint;
                             monster.ChangeAniState(Z_StateMachine.Run);
                             IsMoving = true;
+                            RandomEndTime = Random.RandomRange(2.0f, 3.0f);
                         }
+                        break;
+                    case 3:
+                        monster.ChangeAniState(Z_StateMachine.Turnning);
+                        IsMoving = true;
+                        RandomEndTime = Random.RandomRange(2.0f, 3.0f);
                         break;
                 }
                 RandomTime = 0.0f;
-                RandomEndTime = Random.RandomRange(2.0f, 3.0f);
             }
+        }
+        else if (IsMoving)
+        {
+            if (monster.Z_AniState == Z_StateMachine.Turnning)
+            {
+                if (monster.Z_Ani.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f)
+                {
+                    monster.ChangeAniState(Z_StateMachine.Idle);
+                    IsMoving = false;
+                    RandomEndTime = Random.RandomRange(2.0f, 3.0f);
+                }
+            }
+            FindVisibleTargets();
+            DrawView();
+
         }
     }
 
@@ -137,8 +155,8 @@ public class Z_MonsterController : MonoBehaviour
     {
         Vector3 leftBoundary = DirFormAngle(-viewAngle / 2);
         Vector3 rightBoundary = DirFormAngle(viewAngle / 2);
-        Debug.DrawLine(transform.position, transform.position + leftBoundary * viewDistance, Color.blue);
-        Debug.DrawLine(transform.position, transform.position + rightBoundary * viewDistance, Color.blue);
+        Debug.DrawLine(transform.position + new Vector3(0, 1.5f, 0), new Vector3(0, 1.5f, 0) + transform.position + leftBoundary * viewDistance, Color.blue);
+        Debug.DrawLine(transform.position + new Vector3(0, 1.5f, 0), new Vector3(0, 1.5f, 0) + transform.position + rightBoundary * viewDistance, Color.blue);
     }
 
     public void FindVisibleTargets()
@@ -185,4 +203,9 @@ public enum Z_StateMachine
 public enum Z_Timming
 {
     None = -1, Question, Item, Action, Fight
+}
+
+public enum Z_MoveType
+{
+    None = -1, Walk, Run
 }

@@ -24,6 +24,6 @@ public class IdleState : BaseMachine
     public override void OnExitState()
     {
         Player.Instance.P_Ani.SetBool("Idle", false);
-        Player.Instance.P_RB.velocity = Vector3.zero;
+        Player.Instance.P_RB.velocity = new Vector3(0.0f, Player.Instance.P_RB.velocity.y, 0.0f);
     }
 }

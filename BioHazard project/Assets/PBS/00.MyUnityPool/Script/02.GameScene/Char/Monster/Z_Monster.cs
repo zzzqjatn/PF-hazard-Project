@@ -12,9 +12,6 @@ public class Z_Monster : MonoBehaviour
 
     void Start()
     {
-        Z_RB = this.gameObject.GetComponent<Rigidbody>();
-        Z_Ani = this.gameObject.GetComponent<Animator>();
-        Z_Collider = this.gameObject.GetComponent<CapsuleCollider>();
         InitStateMachine();
     }
 
@@ -30,19 +27,26 @@ public class Z_Monster : MonoBehaviour
 
     private void InitStateMachine()
     {
+        Z_RB = this.gameObject.GetComponent<Rigidbody>();
+        Z_Ani = this.gameObject.GetComponent<Animator>();
+        Z_Collider = this.gameObject.GetComponent<CapsuleCollider>();
+
         Z_MonsterController Z_contorllor = GetComponent<Z_MonsterController>();
 
         Z_IdleState idle = new Z_IdleState();
         Z_WalkState walk = new Z_WalkState();
         Z_RunState run = new Z_RunState();
+        Z_Turnning turn = new Z_Turnning();
 
         idle.SetController(this, Z_contorllor);
         walk.SetController(this, Z_contorllor);
         run.SetController(this, Z_contorllor);
+        turn.SetController(this, Z_contorllor);
 
         Z_State = new Z_MonsterStateMachine(Z_StateMachine.Idle, idle);
         Z_State.AddState(Z_StateMachine.Walk, walk);
         Z_State.AddState(Z_StateMachine.Run, run);
+        Z_State.AddState(Z_StateMachine.Turnning, turn);
     }
 
     public void ChangeAniState(Z_StateMachine changeInput)
