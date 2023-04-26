@@ -26,7 +26,7 @@ public class Z_MonsterController : MonoBehaviour
     private IsColliderHit Z_Attack;
     public Z_MoveType inputType;
 
-    private bool IsFind;
+    public bool IsFind;
 
     void Start()
     {
@@ -61,20 +61,12 @@ public class Z_MonsterController : MonoBehaviour
     {
         if (Z_FieldView.visibleTargets.Count > 0)
         {
-            if (Z_Attack.IsOn == true)
-            {
-                monster.ChangeAniState(Z_StateMachine.Attck);
-            }
-            else if (Z_Attack.IsOn == false)
-            {
-                //탐지 성공
-                targetPos.position = Z_FieldView.visibleTargets[0].transform.position;
-                if (IsFind == false) StartCoroutine(FindScream());
-                // State_WR_changeType();
-            }
+            IsTiming = Z_Timming.Find;
+            IsFind = true;
         }
         else if (Z_FieldView.visibleTargets.Count == 0)
         {
+            IsTiming = Z_Timming.Search;
             IsFind = false;
         }
 
@@ -131,16 +123,30 @@ public class Z_MonsterController : MonoBehaviour
                 }
             }
         }
+        else if (IsTiming == Z_Timming.Find)
+        {
+            if (Z_Attack.IsOn == true)
+            {
+                monster.ChangeAniState(Z_StateMachine.Attck);
+            }
+            else if (Z_Attack.IsOn == false)
+            {
+                //탐지 성공
+                targetPos.position = Z_FieldView.visibleTargets[0].transform.position;
+                if (IsFind == false) StartCoroutine(FindScream());
+                // State_WR_changeType();
+            }
+        }
     }
 
     IEnumerator FindScream()
     {
         yield return new WaitForSeconds(0.2f);
-        IsFind = true;
         Agent.isStopped = true;
         monster.ChangeAniState(Z_StateMachine.Idle);
         monster.ChangeAniState(Z_StateMachine.Scream);
-        // monster.ChangeAniState(Z_StateMachine.Idle);
+        yield return new WaitForSeconds(0.8f);
+        monster.ChangeAniState(Z_StateMachine.Idle);
         // State_WR_changeType();
         // Agent.isStopped = false;
         // if (monster.Z_Ani.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f)
