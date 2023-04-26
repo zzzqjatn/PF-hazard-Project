@@ -1008,7 +1008,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetPos: {fileID: 0}
   Trans: {fileID: 0}
-  IsMoving: 0
+  IsTiming: 0
 --- !u!195 &5420134314103218068
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1968,8 +1968,9 @@ GameObject:
   m_Component:
   - component: {fileID: 5420134315745561631}
   - component: {fileID: 5420134315745561600}
+  - component: {fileID: 6215715963119245549}
   m_Layer: 0
-  m_Name: SoundSearchSphere
+  m_Name: AttackBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2003,3 +2004,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.5, y: 2, z: 1.5}
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &6215715963119245549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5420134315745561630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63450c4d920a1704681a2ae47410fbba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

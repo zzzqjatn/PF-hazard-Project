@@ -18,20 +18,27 @@ public class Z_MonsterController : MonoBehaviour
 
     //===== 
     public Transform Trans;
-    public bool IsMoving;
+    public Z_Timming IsTiming;
 
-    //===== 
-    private Ray ray;
-    private RaycastHit hit;
-    private float viewAngle;
-    public float viewDistance;
-    public LayerMask TargetMask;
-    private LayerMask ObstacleMask;
+    private FieldOfView Z_FieldView;
+    private Z_CustomState Z_customState;
+
+    private IsColliderHit Z_Attack;
+    public Z_MoveType inputType;
+
+    private bool IsFind;
 
     void Start()
     {
+        Z_customState = new Z_CustomState();
+        Z_customState.SetZombiState(100, 0, 80, inputType);
+
         monster = this.gameObject.GetComponent<Z_Monster>();
         Agent = this.gameObject.GetComponent<NavMeshAgent>();
+        Z_FieldView = this.gameObject.GetComponent<FieldOfView>();
+
+        Z_Attack = this.gameObject.FindChildObj("AttackBox").GetComponent<IsColliderHit>();
+
         Trans = this.transform;
         Agent.baseOffset = -0.05f;
 
@@ -41,7 +48,8 @@ public class Z_MonsterController : MonoBehaviour
         RandomEndTime = Random.RandomRange(0.0f, 6.0f);
 
         targetRange = 10.0f;
-        IsMoving = false;
+        IsTiming = Z_Timming.Search;
+        IsFind = false;
     }
 
     void Update()
@@ -51,7 +59,26 @@ public class Z_MonsterController : MonoBehaviour
 
     private void RandomPattens()
     {
-        if (!IsMoving)
+        if (Z_FieldView.visibleTargets.Count > 0)
+        {
+            if (Z_Attack.IsOn == true)
+            {
+                monster.ChangeAniState(Z_StateMachine.Attck);
+            }
+            else if (Z_Attack.IsOn == false)
+            {
+                //탐지 성공
+                targetPos.position = Z_FieldView.visibleTargets[0].transform.position;
+                if (IsFind == false) StartCoroutine(FindScream());
+                // State_WR_changeType();
+            }
+        }
+        else if (Z_FieldView.visibleTargets.Count == 0)
+        {
+            IsFind = false;
+        }
+
+        if (IsTiming == Z_Timming.Search)
         {
             RandomTime += Time.deltaTime;
 
@@ -63,51 +90,78 @@ public class Z_MonsterController : MonoBehaviour
                 {
                     case 0:
                         monster.ChangeAniState(Z_StateMachine.Idle);
-                        IsMoving = false;
                         RandomEndTime = Random.RandomRange(2.0f, 10.0f);
                         break;
                     case 1:
-                        if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint))
+                        if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint) && Z_customState.MoveType == Z_MoveType.Walk)
                         {
                             targetPos.position = rpPoint;
                             monster.ChangeAniState(Z_StateMachine.Walk);
-                            IsMoving = true;
+                            IsTiming = Z_Timming.Moving;
                             RandomEndTime = Random.RandomRange(2.0f, 3.0f);
                         }
                         break;
                     case 2:
-                        if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint))
+                        if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint) && Z_customState.MoveType == Z_MoveType.Run)
                         {
                             targetPos.position = rpPoint;
                             monster.ChangeAniState(Z_StateMachine.Run);
-                            IsMoving = true;
+                            IsTiming = Z_Timming.Moving;
                             RandomEndTime = Random.RandomRange(2.0f, 3.0f);
                         }
                         break;
                     case 3:
                         monster.ChangeAniState(Z_StateMachine.Turnning);
-                        IsMoving = true;
+                        IsTiming = Z_Timming.Moving;
                         RandomEndTime = Random.RandomRange(2.0f, 3.0f);
                         break;
                 }
                 RandomTime = 0.0f;
             }
         }
-        else if (IsMoving)
+        else if (IsTiming == Z_Timming.Moving)
         {
             if (monster.Z_AniState == Z_StateMachine.Turnning)
             {
                 if (monster.Z_Ani.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f)
                 {
                     monster.ChangeAniState(Z_StateMachine.Idle);
-                    IsMoving = false;
+                    IsTiming = Z_Timming.Search;
                     RandomEndTime = Random.RandomRange(2.0f, 3.0f);
                 }
             }
-            FindVisibleTargets();
-            DrawView();
-
         }
+    }
+
+    IEnumerator FindScream()
+    {
+        yield return new WaitForSeconds(0.2f);
+        IsFind = true;
+        Agent.isStopped = true;
+        monster.ChangeAniState(Z_StateMachine.Idle);
+        monster.ChangeAniState(Z_StateMachine.Scream);
+        // monster.ChangeAniState(Z_StateMachine.Idle);
+        // State_WR_changeType();
+        // Agent.isStopped = false;
+        // if (monster.Z_Ani.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f)
+        // {
+        //     monster.ChangeAniState(Z_StateMachine.Idle);
+        //     State_WR_changeType();
+        // }
+    }
+
+    private void State_WR_changeType()
+    {
+        if (Z_customState.MoveType == Z_MoveType.Walk)
+        {
+            monster.ChangeAniState(Z_StateMachine.Walk);
+        }
+        else if (Z_customState.MoveType == Z_MoveType.Run)
+        {
+            monster.ChangeAniState(Z_StateMachine.Run);
+        }
+        IsTiming = Z_Timming.Moving;
+        RandomEndTime = Random.RandomRange(2.0f, 3.0f);
     }
 
     public bool CheckRandomPoint(Vector3 center, float range, out Vector3 result)
@@ -140,49 +194,8 @@ public class Z_MonsterController : MonoBehaviour
     public void StopAndResetMotion()
     {
         monster.ChangeAniState(Z_StateMachine.Idle);
-        IsMoving = false;
+        IsTiming = Z_Timming.Search;
     }
-
-    //==========================================================
-
-    public Vector3 DirFormAngle(float angleDegrees)
-    {
-        angleDegrees += transform.eulerAngles.y;
-        return new Vector3(Mathf.Sin(angleDegrees * Mathf.Deg2Rad), 0, Mathf.Cos(angleDegrees * Mathf.Deg2Rad));
-    }
-
-    public void DrawView()
-    {
-        Vector3 leftBoundary = DirFormAngle(-viewAngle / 2);
-        Vector3 rightBoundary = DirFormAngle(viewAngle / 2);
-        Debug.DrawLine(transform.position + new Vector3(0, 1.5f, 0), new Vector3(0, 1.5f, 0) + transform.position + leftBoundary * viewDistance, Color.blue);
-        Debug.DrawLine(transform.position + new Vector3(0, 1.5f, 0), new Vector3(0, 1.5f, 0) + transform.position + rightBoundary * viewDistance, Color.blue);
-    }
-
-    public void FindVisibleTargets()
-    {
-        Collider[] targets = Physics.OverlapSphere(transform.position, viewDistance, TargetMask);
-
-        if (targets.Length > 0)
-        {
-            for (int i = 0; i < targets.Length; i++)
-            {
-                Transform target = targets[i].transform;
-                Vector3 dirToTarget = (target.position - transform.position).normalized;
-
-                if (Vector3.Dot(transform.forward, dirToTarget) > Mathf.Cos((viewAngle / 2) * Mathf.Deg2Rad))
-                {
-                    float distToTarget = Vector3.Distance(transform.position, target.position);
-
-                    if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, ObstacleMask))
-                    {
-                        Debug.DrawLine(transform.position, target.position, Color.red);
-                    }
-                }
-            }
-        }
-    }
-
     // private void IsMovingEnd()
     // {
     //     if (IsMoving)
@@ -202,10 +215,5 @@ public enum Z_StateMachine
 
 public enum Z_Timming
 {
-    None = -1, Question, Item, Action, Fight
-}
-
-public enum Z_MoveType
-{
-    None = -1, Walk, Run
+    None = -1, Search, Moving, Find
 }

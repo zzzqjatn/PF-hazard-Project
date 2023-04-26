@@ -37,16 +37,25 @@ public class Z_Monster : MonoBehaviour
         Z_WalkState walk = new Z_WalkState();
         Z_RunState run = new Z_RunState();
         Z_Turnning turn = new Z_Turnning();
+        Z_Scream Scream = new Z_Scream();
+        Z_Attack Attack = new Z_Attack();
+        Z_HitBite HitBite = new Z_HitBite();
 
         idle.SetController(this, Z_contorllor);
         walk.SetController(this, Z_contorllor);
         run.SetController(this, Z_contorllor);
         turn.SetController(this, Z_contorllor);
+        Scream.SetController(this, Z_contorllor);
+        Attack.SetController(this, Z_contorllor);
+        HitBite.SetController(this, Z_contorllor);
 
         Z_State = new Z_MonsterStateMachine(Z_StateMachine.Idle, idle);
         Z_State.AddState(Z_StateMachine.Walk, walk);
         Z_State.AddState(Z_StateMachine.Run, run);
         Z_State.AddState(Z_StateMachine.Turnning, turn);
+        Z_State.AddState(Z_StateMachine.Scream, Scream);
+        Z_State.AddState(Z_StateMachine.Attck, Attack);
+        Z_State.AddState(Z_StateMachine.HitBite, HitBite);
     }
 
     public void ChangeAniState(Z_StateMachine changeInput)
