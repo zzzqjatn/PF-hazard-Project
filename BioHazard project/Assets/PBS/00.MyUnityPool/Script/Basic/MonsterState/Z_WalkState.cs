@@ -6,7 +6,7 @@ public class Z_WalkState : BaseMachine
 {
     Z_Monster Z_monster;
     Z_MonsterController Z_control;
-    float F_Angle;
+    // float F_Angle;
 
     public override void OnEnterState()
     {
@@ -14,8 +14,6 @@ public class Z_WalkState : BaseMachine
         Z_control.SetNavOffsetY(-0.1f);
 
         Z_control.Agent.speed = 0.8f;
-        // Z_control.Agent.speed = 0;
-        // Z_control.Agent.angularSpeed = 20;
         Z_control.Agent.SetDestination(Z_control.targetPos.position);
     }
 
@@ -36,20 +34,13 @@ public class Z_WalkState : BaseMachine
 
     private void MoveCheckMonster()
     {
-        Vector3 targetDir = (Z_control.targetPos.position - Z_control.Trans.position).normalized;
+        Vector3 targetDir = (Z_control.targetPos.position - Z_control.transform.position).normalized;
         targetDir.y = 0;
 
-        F_Angle = Vector3.Angle(targetDir, Z_control.Trans.forward);
-        // Z_control.SetTranRot(Quaternion.Slerp(Z_control.Trans.rotation, Quaternion.LookRotation(targetDir), Time.deltaTime * 2.0f));
-        // Debug.Log(F_Angle);
+        // F_Angle = Vector3.Angle(targetDir, Z_control.transform.forward);
+        // Z_control.SetTranRot(Quaternion.Slerp(Z_control.transform.rotation, Quaternion.LookRotation(targetDir), Time.deltaTime * 2.0f));
 
-        if (F_Angle <= 1.0f)
-        {
-            // Z_control.Agent.speed = 1;
-        }
-
-        float targetDis = Vector3.Distance(Z_control.targetPos.position, Z_control.Trans.position);
-        // Debug.Log(targetDis);
+        float targetDis = Vector3.Distance(Z_control.targetPos.position, Z_control.transform.position);
 
         if (targetDis <= 0.3f)
         {

@@ -5,51 +5,44 @@ using UnityEngine.AI;
 
 public class Z_MonsterController : MonoBehaviour
 {
-    //===== 
-    private const float MOVE_SPEED_DEFAULT = 1.0f;
-    private Z_Monster monster;
+    public Transform targetPos;
     public NavMeshAgent Agent { get; private set; }
-    private float MoveSpeed;
+    private Z_Monster monster;
     private float RandomTime;
     private float RandomEndTime;
-    public Transform targetPos;
     private float targetRange;
-    private Vector3 rpPoint;
+    private Vector3 ResultPoint;
 
-    //===== 
-    public Transform Trans;
-    public Z_Timming IsTiming;
 
-    private FieldOfView Z_FieldView;
-    private Z_CustomState Z_customState;
+    private FieldOfView FieldView;
+    private Z_CustomState customState;
 
-    private IsColliderHit Z_Attack;
+    private IsColliderHit Attack;
     public Z_MoveType inputType;
 
     public bool IsFind;
+    private bool IsOnce;
+    private bool IsFollow;
 
     void Start()
     {
-        Z_customState = new Z_CustomState();
-        Z_customState.SetZombiState(100, 0, 80, inputType);
+        customState = new Z_CustomState();
+        customState.SetZombiState(100, 0, 80, inputType);
 
         monster = this.gameObject.GetComponent<Z_Monster>();
         Agent = this.gameObject.GetComponent<NavMeshAgent>();
-        Z_FieldView = this.gameObject.GetComponent<FieldOfView>();
+        FieldView = this.gameObject.GetComponent<FieldOfView>();
+        Attack = this.gameObject.FindChildObj("AttackBox").GetComponent<IsColliderHit>();
 
-        Z_Attack = this.gameObject.FindChildObj("AttackBox").GetComponent<IsColliderHit>();
-
-        Trans = this.transform;
         Agent.baseOffset = -0.05f;
-
-        MoveSpeed = MOVE_SPEED_DEFAULT;
 
         RandomTime = 0;
         RandomEndTime = Random.RandomRange(0.0f, 6.0f);
 
         targetRange = 10.0f;
-        IsTiming = Z_Timming.Search;
         IsFind = false;
+        IsOnce = false;
+        IsFollow = false;
     }
 
     void Update()
@@ -57,84 +50,99 @@ public class Z_MonsterController : MonoBehaviour
         RandomPattens();
     }
 
+    private void FixedUpdate()
+    {
+        if (IsFollow)
+        {
+            float targetDis = Vector3.Distance(targetPos.position, transform.position);
+            if (targetDis <= 0.1f)
+            {
+                StopAndResetMotion();
+            }
+            IsFollow = false;
+        }
+    }
+
     private void RandomPattens()
     {
-        if (Z_FieldView.visibleTargets.Count > 0)
+        if (FieldView.visibleTargets.Count > 0)
         {
-            IsTiming = Z_Timming.Find;
             IsFind = true;
         }
-        else if (Z_FieldView.visibleTargets.Count == 0)
-        {
-            IsTiming = Z_Timming.Search;
-            IsFind = false;
-        }
 
-        if (IsTiming == Z_Timming.Search)
+        if (IsFind)
         {
-            RandomTime += Time.deltaTime;
-
-            if (RandomTime >= RandomEndTime)
+            if (Attack.IsOn == true)
             {
-                int stateNum = Random.RandomRange(0, 4);
-
-                switch (stateNum)
-                {
-                    case 0:
-                        monster.ChangeAniState(Z_StateMachine.Idle);
-                        RandomEndTime = Random.RandomRange(2.0f, 10.0f);
-                        break;
-                    case 1:
-                        if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint) && Z_customState.MoveType == Z_MoveType.Walk)
-                        {
-                            targetPos.position = rpPoint;
-                            monster.ChangeAniState(Z_StateMachine.Walk);
-                            IsTiming = Z_Timming.Moving;
-                            RandomEndTime = Random.RandomRange(2.0f, 3.0f);
-                        }
-                        break;
-                    case 2:
-                        if (CheckRandomPoint(targetPos.position, targetRange, out rpPoint) && Z_customState.MoveType == Z_MoveType.Run)
-                        {
-                            targetPos.position = rpPoint;
-                            monster.ChangeAniState(Z_StateMachine.Run);
-                            IsTiming = Z_Timming.Moving;
-                            RandomEndTime = Random.RandomRange(2.0f, 3.0f);
-                        }
-                        break;
-                    case 3:
-                        monster.ChangeAniState(Z_StateMachine.Turnning);
-                        IsTiming = Z_Timming.Moving;
-                        RandomEndTime = Random.RandomRange(2.0f, 3.0f);
-                        break;
-                }
-                RandomTime = 0.0f;
-            }
-        }
-        else if (IsTiming == Z_Timming.Moving)
-        {
-            if (monster.Z_AniState == Z_StateMachine.Turnning)
-            {
-                if (monster.Z_Ani.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f)
+                if (monster.Z_AniState != Z_StateMachine.Idle)
                 {
                     monster.ChangeAniState(Z_StateMachine.Idle);
-                    IsTiming = Z_Timming.Search;
-                    RandomEndTime = Random.RandomRange(2.0f, 3.0f);
                 }
-            }
-        }
-        else if (IsTiming == Z_Timming.Find)
-        {
-            if (Z_Attack.IsOn == true)
-            {
                 monster.ChangeAniState(Z_StateMachine.Attck);
             }
-            else if (Z_Attack.IsOn == false)
+            else if (Attack.IsOn == false) //탐지
             {
-                //탐지 성공
-                targetPos.position = Z_FieldView.visibleTargets[0].transform.position;
-                if (IsFind == false) StartCoroutine(FindScream());
-                // State_WR_changeType();
+                if (FieldView.visibleTargets.Count > 0)
+                {
+                    targetPos.position = FieldView.visibleTargets[0].transform.position;
+                    if (!IsOnce)
+                    {
+                        IsOnce = true;
+                        StartCoroutine(FindScream());
+                    }
+
+                    if (IsFollow)
+                    {
+                        State_WR_changeType();
+                    }
+                }
+            }
+
+            if (FieldView.visibleTargets.Count == 0)
+            {
+                IsOnce = false;
+                Agent.isStopped = true;    //임시
+                StopAndResetMotion();
+                IsFind = false;
+                IsFollow = false;
+            }
+        }
+        else
+        {
+            if (monster.Z_AniState == Z_StateMachine.Idle)
+            {
+                RandomTime += Time.deltaTime;
+
+                if (RandomTime >= RandomEndTime)
+                {
+                    int stateNum = Random.RandomRange(0, 3);
+
+                    switch (stateNum)
+                    {
+                        case 0:
+                            monster.ChangeAniState(Z_StateMachine.Idle);
+                            RandomEndTime = Random.RandomRange(2.0f, 5.0f);
+                            break;
+                        case 1:
+                            if (CheckRandomPoint(targetPos.position, targetRange, out ResultPoint))
+                            {
+                                if (Agent.isStopped == true) Agent.isStopped = false;
+                                targetPos.position = ResultPoint;
+                                State_WR_changeType();
+                                RandomEndTime = Random.RandomRange(2.0f, 3.0f);
+                            }
+                            break;
+                        case 2:
+                            monster.ChangeAniState(Z_StateMachine.Turnning);
+                            RandomEndTime = Random.RandomRange(2.0f, 3.0f);
+                            break;
+                    }
+                    RandomTime = 0.0f;
+                }
+            }
+            else
+            {
+
             }
         }
     }
@@ -142,32 +150,25 @@ public class Z_MonsterController : MonoBehaviour
     IEnumerator FindScream()
     {
         yield return new WaitForSeconds(0.2f);
-        Agent.isStopped = true;
-        monster.ChangeAniState(Z_StateMachine.Idle);
+        if (Agent.isStopped == false) Agent.isStopped = true;
+        yield return new WaitForSeconds(2.0f);
         monster.ChangeAniState(Z_StateMachine.Scream);
-        yield return new WaitForSeconds(0.8f);
-        monster.ChangeAniState(Z_StateMachine.Idle);
-        // State_WR_changeType();
-        // Agent.isStopped = false;
-        // if (monster.Z_Ani.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f)
-        // {
-        //     monster.ChangeAniState(Z_StateMachine.Idle);
-        //     State_WR_changeType();
-        // }
+        yield return new WaitForSeconds(1.5f);
+        Debug.Log("2초뒤 발생");
+        if (Agent.isStopped == true) Agent.isStopped = false;
+        IsFollow = true;
     }
 
     private void State_WR_changeType()
     {
-        if (Z_customState.MoveType == Z_MoveType.Walk)
+        if (customState.MoveType == Z_MoveType.Walk)
         {
             monster.ChangeAniState(Z_StateMachine.Walk);
         }
-        else if (Z_customState.MoveType == Z_MoveType.Run)
+        else if (customState.MoveType == Z_MoveType.Run)
         {
             monster.ChangeAniState(Z_StateMachine.Run);
         }
-        IsTiming = Z_Timming.Moving;
-        RandomEndTime = Random.RandomRange(2.0f, 3.0f);
     }
 
     public bool CheckRandomPoint(Vector3 center, float range, out Vector3 result)
@@ -200,19 +201,9 @@ public class Z_MonsterController : MonoBehaviour
     public void StopAndResetMotion()
     {
         monster.ChangeAniState(Z_StateMachine.Idle);
-        IsTiming = Z_Timming.Search;
+        RandomTime = 0.0f;
+        RandomEndTime = Random.RandomRange(2.0f, 10.0f);
     }
-    // private void IsMovingEnd()
-    // {
-    //     if (IsMoving)
-    //     {
-    //         if (Vector3.Distance(transform.position, targetPos) > 0.2f)
-    //         {
-    //             Z_monster.ChangeAniState(Z_StateMachine.Idle);
-    //             IsMoving = false;
-    //         }
-    //     }
-    // }
 }
 public enum Z_StateMachine
 {
