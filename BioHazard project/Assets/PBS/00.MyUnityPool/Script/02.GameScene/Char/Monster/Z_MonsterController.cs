@@ -7,22 +7,21 @@ public class Z_MonsterController : MonoBehaviour
 {
     public Transform targetPos;
     public NavMeshAgent Agent { get; private set; }
+    public float targetRange = 10.0f;
     private Z_Monster monster;
     private float RandomTime;
     private float RandomEndTime;
-    private float targetRange;
     private Vector3 ResultPoint;
-
 
     private FieldOfView FieldView;
     private Z_CustomState customState;
 
-    private IsColliderHit Attack;
+    private IsColliderHit AttackTrigger;
     public Z_MoveType inputType;
 
     public bool IsFind;
-    private bool IsOnce;
-    private bool IsFollow;
+    public bool IsOnce;
+    public bool IsFollow;
 
     void Start()
     {
@@ -32,14 +31,13 @@ public class Z_MonsterController : MonoBehaviour
         monster = this.gameObject.GetComponent<Z_Monster>();
         Agent = this.gameObject.GetComponent<NavMeshAgent>();
         FieldView = this.gameObject.GetComponent<FieldOfView>();
-        Attack = this.gameObject.FindChildObj("AttackBox").GetComponent<IsColliderHit>();
+        AttackTrigger = this.gameObject.FindChildObj("AttackBox").GetComponent<IsColliderHit>();
 
         Agent.baseOffset = -0.05f;
 
         RandomTime = 0;
         RandomEndTime = Random.RandomRange(0.0f, 6.0f);
 
-        targetRange = 10.0f;
         IsFind = false;
         IsOnce = false;
         IsFollow = false;
@@ -65,14 +63,16 @@ public class Z_MonsterController : MonoBehaviour
 
     private void RandomPattens()
     {
+        // 주변에 탐지되었으면
         if (FieldView.visibleTargets.Count > 0)
         {
             IsFind = true;
         }
 
+        // 탐지되었을 때
         if (IsFind)
         {
-            if (Attack.IsOn == true)
+            if (AttackTrigger.IsOn == true) // 공격범위 안
             {
                 if (monster.Z_AniState != Z_StateMachine.Idle)
                 {
@@ -80,11 +80,19 @@ public class Z_MonsterController : MonoBehaviour
                 }
                 monster.ChangeAniState(Z_StateMachine.Attck);
             }
-            else if (Attack.IsOn == false) //탐지
+            else if (AttackTrigger.IsOn == false) // 공격범위 밖
             {
-                if (FieldView.visibleTargets.Count > 0)
+                if (FieldView.visibleTargets.Count <= 0)    // 범위에서 벗어나면
+                {
+                    StopAndResetMotion();
+                    IsOnce = false;
+                    IsFind = false;
+                    IsFollow = false;
+                }
+                else
                 {
                     targetPos.position = FieldView.visibleTargets[0].transform.position;
+
                     if (!IsOnce)
                     {
                         IsOnce = true;
@@ -97,26 +105,15 @@ public class Z_MonsterController : MonoBehaviour
                     }
                 }
             }
-
-            if (FieldView.visibleTargets.Count == 0)
-            {
-                IsOnce = false;
-                Agent.isStopped = true;    //임시
-                StopAndResetMotion();
-                IsFind = false;
-                IsFollow = false;
-            }
         }
-        else
+        else if(!IsFind) // 기본 패턴
         {
             if (monster.Z_AniState == Z_StateMachine.Idle)
             {
                 RandomTime += Time.deltaTime;
-
                 if (RandomTime >= RandomEndTime)
                 {
                     int stateNum = Random.RandomRange(0, 3);
-
                     switch (stateNum)
                     {
                         case 0:
@@ -140,10 +137,6 @@ public class Z_MonsterController : MonoBehaviour
                     RandomTime = 0.0f;
                 }
             }
-            else
-            {
-
-            }
         }
     }
 
@@ -151,12 +144,12 @@ public class Z_MonsterController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.2f);
         if (Agent.isStopped == false) Agent.isStopped = true;
-        yield return new WaitForSeconds(2.0f);
         monster.ChangeAniState(Z_StateMachine.Scream);
-        yield return new WaitForSeconds(1.5f);
-        Debug.Log("2초뒤 발생");
-        if (Agent.isStopped == true) Agent.isStopped = false;
-        IsFollow = true;
+        // yield return new WaitForSeconds(2.0f);
+        // monster.ChangeAniState(Z_StateMachine.Scream);
+        // yield return new WaitForSeconds(1.5f);
+        // if (Agent.isStopped == true) Agent.isStopped = false;
+        // IsFollow = true;
     }
 
     private void State_WR_changeType()

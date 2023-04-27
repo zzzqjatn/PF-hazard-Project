@@ -19,10 +19,12 @@ public class Z_Scream : BaseMachine
 
     public override void OnFixedUpdateState()
     {
-        if (Z_control.IsFind == false)
-        {
-            AniEnd();
-        }
+        AniEnd();
+
+        // if (Z_control.IsFind == true)
+        // {
+        //     AniEnd();
+        // }
     }
 
     public override void OnExitState()
